@@ -1,4 +1,5 @@
 import math
+from core.grid import CellType
 
 class Builder:
     """
@@ -37,9 +38,23 @@ class Builder:
         # Запрашиваем у Солвера оптимальный путь для переданного состояния сетки
         # (предполагается, что метод find_path принимает конкретную сетку для анализа)
         # (например, используются геттеры test_grid.get_start()), замени эти строки!
-        start_pos = test_grid.get_start()  
-        goal_pos = test_grid.get_start()    
+        # start_pos = test_grid.get_start()  
+        # goal_pos = test_grid.get_goal()    
         
+
+        # Получаем объекты ячеек старта и финиша
+        start_cell = test_grid.get_start()  
+        goal_cell = test_grid.get_goal() # Убедитесь, что метод называется так
+        
+        # Защита от краша: если старта или финиша нет, путь невозможен
+        if not start_cell or not goal_cell:
+            return -float('inf')
+        
+        # Превращаем объекты в кортежи координат (x, y)
+        start_pos = (start_cell.x, start_cell.y)
+        goal_pos = (goal_cell.x, goal_cell.y)
+
+
         # 2. Запрашиваем оптимальный путь, передавая КООРДИНАТЫ, а не сетку
         path = self.solver.find_path(start_pos, goal_pos)
         
@@ -123,12 +138,12 @@ class Builder:
             max_eval = -float('inf')
             
             for x, y in test_grid.get_empty_cells_coords():
-                test_grid.set_cell_type(x, y, 'OBSTACLE') # Делаем гипотетический ход
+                test_grid.set_cell_type(x, y, CellType.OBSTACLE) # Делаем гипотетический ход
                 
                 # Рекурсивно вызываем для следующего агента (MIN)
                 eval_score = self.minimax(test_grid, depth - 1, False, alpha, beta)
                 
-                test_grid.set_cell_type(x, y, 'EMPTY') # Откатываем ход
+                test_grid.set_cell_type(x, y, CellType.EMPTY) # Откатываем ход
                 
                 max_eval = max(max_eval, eval_score)
                 

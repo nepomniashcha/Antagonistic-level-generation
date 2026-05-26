@@ -1,5 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass
+from typing import Tuple, List 
 
 class CellType(Enum):
     """Перечисление возможных типов ячейки на сетке."""
@@ -9,7 +10,7 @@ class CellType(Enum):
     GOAL = 3
     INTERACTIVE = 4
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Cell:
     """
     Класс ячейки, хранящий координаты (x, y) и её текущий тип.
@@ -22,6 +23,7 @@ class Cell:
     def is_passable(self) -> bool:
         """Вспомогательный метод: проверяет, можно ли пройти через ячейку."""
         return self.type != CellType.OBSTACLE
+    
     
     # def get_cost(self) -> float:
     #     """
@@ -72,13 +74,43 @@ class Grid:
         else:
             raise IndexError(f"Координаты ({x}, {y}) находятся вне границ сетки размером {self.width}x{self.height}.")
     
-    def get_neighbors(self, cell: Cell) -> list[Cell]:
+    # def get_neighbors(self, cell: Cell) -> list[Cell]:
+    #     """
+    #     Возвращает список соседних доступных (проходимых) ячеек.
+    #     В данной реализации диагональные перемещения отключены.
+    #     """
+    #     neighbors = []
+    #     x, y = cell.x, cell.y
+
+    #     # Соседние клетки по вертикали и горизонтали (вверх, вправо, вниз, влево)
+    #     directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+
+    #     # Диагональные соседи (закомментированы по условию задачи)
+    #     # diagonal_directions = [(-1, -1), (1, -1), (1, 1), (-1, 1)]
+    #     # directions.extend(diagonal_directions)
+
+    #     for dx, dy in directions:
+    #         nx, ny = x + dx, y + dy
+            
+    #         # Проверяем, не выходит ли сосед за границы поля
+    #         if self._is_within_bounds(nx, ny):
+    #             neighbor_cell = self.grid[nx][ny]
+                
+    #             # Добавляем в список только проходимые ячейки (не препятствия)
+    #             if neighbor_cell.is_passable():
+    #                 neighbors.append(neighbor_cell)
+
+    #     return neighbors
+
+
+
+    def get_neighbors(self, pos: Tuple[int, int]) -> List[Tuple[int, int]]:
         """
-        Возвращает список соседних доступных (проходимых) ячеек.
+        Возвращает список координат (x, y) соседних доступных (проходимых) ячеек.
         В данной реализации диагональные перемещения отключены.
         """
         neighbors = []
-        x, y = cell.x, cell.y
+        x, y = pos # Распаковываем переданный кортеж
 
         # Соседние клетки по вертикали и горизонтали (вверх, вправо, вниз, влево)
         directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
@@ -96,7 +128,8 @@ class Grid:
                 
                 # Добавляем в список только проходимые ячейки (не препятствия)
                 if neighbor_cell.is_passable():
-                    neighbors.append(neighbor_cell)
+                    # ВАЖНО: Возвращаем кортежи координат, а не объекты Cell!
+                    neighbors.append((nx, ny))
 
         return neighbors
 

@@ -11,8 +11,6 @@ from core.builder import Builder
 from ui.window import GameWindow
 
 def main():
-    print("Инициализация приложения...")
-
     # --- 1. Логика инициализации приложения и структур данных ---
     # Задаем размеры дискретной сетки игрового поля
     GRID_WIDTH = 20
@@ -41,8 +39,6 @@ def main():
     
     # Инициализируем окно, передавая ему необходимые параметры для отрисовки
     game_window = GameWindow(WINDOW_WIDTH, WINDOW_HEIGHT, GRID_WIDTH, GRID_HEIGHT)
-
-    print("Инициализация успешно завершена. Переход к игровому циклу...")
 
     # --- 5. Налаштування ігрового циклу (Task 5.2) ---
     clock = pygame.time.Clock()
