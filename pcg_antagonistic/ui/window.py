@@ -66,8 +66,8 @@ class GameWindow:
         cols = len(grid_data[0])
 
         # Динамическое вычисление размеров одной ячейки на основе размера окна
-        cell_width = self.width // cols
-        cell_height = self.height // rows
+        cell_width = self.window_width // cols
+        cell_height = self.window_height // rows
 
         for y in range(rows):
             for x in range(cols):
@@ -78,13 +78,13 @@ class GameWindow:
                 if "EMPTY" in cell_value:
                     color = self.COLOR_WHITE
                 elif "OBSTACLE" in cell_value:
-                    color = self.COLOR_BLACK  # Черный для препятствий
+                    color = self.COLOR_BLACK
                 elif "START" in cell_value:
                     color = self.COLOR_GREEN
                 elif "GOAL" in cell_value:
                     color = self.COLOR_RED
                 else:
-                    color = self.COLOR_WHITE  # Цвет по умолчанию, если тип не распознан
+                    color = self.COLOR_WHITE
 
                 # Вычисление координат для текущего квадрата
                 rect = (x * cell_width, y * cell_height, cell_width, cell_height)
@@ -95,7 +95,7 @@ class GameWindow:
                 # Отрисовка контура ячейки (серая линия сетки для визуального разделения)
                 pygame.draw.rect(self.screen, self.COLOR_GRAY, rect, 1)
     
-    def draw_path(self, path_coords, cols, rows):
+    def draw_path(self, path_coords):
         """
         Отрисовка оптимального пути поверх сгенерированного уровня.
         
@@ -108,19 +108,21 @@ class GameWindow:
             return
 
         # Вычисляем размеры ячейки (аналогично методу draw_grid)
-        cell_width = self.width // cols
-        cell_height = self.height // rows
+        cell_width = self.window_width // self.grid_width
+        cell_height = self.window_height // self.grid_height
 
         for x, y in path_coords:
-            # Вычисляем позицию квадрата на экране
-            # Предполагается, что координаты передаются в формате (x, y), где x - столбец, y - строка
-            rect = (x * cell_width, y * cell_height, cell_width, cell_height)
+                    # Делаем отступы, чтобы путь рисовался внутри ячейки, а не на всю её ширину
+                    margin_x = cell_width // 4
+                    margin_y = cell_height // 4
+                    
+                    rect = (x * cell_width + margin_x, 
+                            y * cell_height + margin_y, 
+                            cell_width - (margin_x * 2), 
+                            cell_height - (margin_y * 2))
 
-            # Закрашиваем ячейку цветом пути (COLOR_BLUE был задан в Task 4.1)
-            pygame.draw.rect(self.screen, self.COLOR_BLUE, rect)
-
-            # Отрисовываем серый контур ячейки поверх пути для сохранения визуальной структуры сетки
-            pygame.draw.rect(self.screen, self.COLOR_GRAY, rect, 1)
+                    # Закрашиваем ячейку цветом пути
+                    pygame.draw.rect(self.screen, self.COLOR_BLUE, rect)
 
     def handle_events(self):
         """

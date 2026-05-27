@@ -1,13 +1,11 @@
 import sys
 import pygame
 
-# Импорты модулей ядра (Core), содержащих бизнес-логику и агентов
 from core.grid import Grid
 from core.solver import Solver
 from core.astar import AStarSolver
 from core.builder import Builder
 
-# Импорт модуля графического интерфейса (UI)
 from ui.window import GameWindow
 
 def main():
@@ -40,31 +38,41 @@ def main():
     # Инициализируем окно, передавая ему необходимые параметры для отрисовки
     game_window = GameWindow(WINDOW_WIDTH, WINDOW_HEIGHT, GRID_WIDTH, GRID_HEIGHT)
 
+    # ... (код до игрового цикла остается прежним) ...
+    
     # --- 5. Налаштування ігрового циклу (Task 5.2) ---
     clock = pygame.time.Clock()
-    FPS = 30 # Обмеження кадрів в секунду для плавності візуалізації
+    FPS = 30
     
     running = True
     generation_finished = False
 
+    # Первоначальный поиск пути для старта
+    solver.calculate_path()
+
     while running:
-        # 5.2.1 Обробка подій (закриття вікна, натискання клавіш)
-        running = game_window.handle_events()
+        # 5.2.1 Обробка подій
+        # ПРАВИЛЬНО ИЗВЛЕКАЕМ СЛОВАРЬ
+        actions = game_window.handle_events()
         
-        # 5.2.2 Оновлення стану генерації (якщо вона ще йде)
-        if not generation_finished:
-            # Викликаємо один крок алгоритму Конструктора
-            # Метод generate_step() повинен повертати True, якщо генерація триває, і False, якщо завершена
+        # Если нажали крестик или Esc - выходим из цикла
+        if actions["quit"]:
+            running = False
+            break
+        
+        # 5.2.2 Оновлення стану генерації
+        # Запускаем генерацию ТОЛЬКО если нажат ПРОБЕЛ (или если хотите автоматически, уберите and actions["next_step"])
+        if not generation_finished and actions["next_step"]:
             generation_in_progress = builder.generate_step() 
+            
             if not generation_in_progress:
                 generation_finished = True
-                print("Генерацію рівня завершено.")
+                print("Генерацію рівня завершено. Уровень полностью застроен.")
                 
             # Після зміни сітки Конструктором, просимо Гравця знайти новий оптимальний шлях
             solver.calculate_path()
         
         # 5.2.3 Отримання даних сітки та передача у GameWindow
-        # Отримуємо чистий масив стану сітки з Core і передаємо в UI
         game_window.draw_grid(grid.get_data())
         
         # 5.2.4 Передача та відмальовування знайденого шляху
@@ -77,6 +85,8 @@ def main():
         
         # Контроль частоти кадрів
         clock.tick(FPS)
+
+    game_window.quit() # Корректное закрытие окна
 
 if __name__ == "__main__":
     main()

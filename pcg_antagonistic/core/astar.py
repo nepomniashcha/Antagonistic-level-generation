@@ -62,12 +62,8 @@ class AStarSolver(Solver):
             #             heapq.heappush(open_set, (f_score[neighbor], neighbor))
             #             open_set_hash.add(neighbor)
             # Получаем соседей (объекты Cell)
-            for cell_neighbor in self.grid.get_neighbors(current):
-                
-                # ПРЕВРАЩАЕМ ОБЪЕКТ В КОРТЕЖ КООРДИНАТ
-                neighbor = (cell_neighbor.x, cell_neighbor.y)
-                
-                # Дальше ваш код остается абсолютно без изменений!
+            # Получаем соседей (уже в виде кортежей координат)
+            for neighbor in self.grid.get_neighbors(current):
                 tentative_g_score = g_score[current] + 1 
                 
                 if neighbor not in g_score or tentative_g_score < g_score[neighbor]:

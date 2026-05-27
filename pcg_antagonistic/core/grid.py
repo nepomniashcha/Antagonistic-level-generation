@@ -107,7 +107,6 @@ class Grid:
     def get_neighbors(self, pos: Tuple[int, int]) -> List[Tuple[int, int]]:
         """
         Возвращает список координат (x, y) соседних доступных (проходимых) ячеек.
-        В данной реализации диагональные перемещения отключены.
         """
         neighbors = []
         x, y = pos # Распаковываем переданный кортеж
@@ -201,3 +200,12 @@ class Grid:
                 if self.grid[x][y].type == CellType.EMPTY:
                     return True
         return False
+    
+    def get_data(self) -> list[list[Cell]]:
+        """
+        Возвращает внутренний двумерный массив сетки.
+        Используется для передачи данных в UI.
+        """
+        # Since the UI expects grid_data[y][x] but self.grid is stored as [x][y],
+        # we transpose it here so it draws correctly without rotating the map!
+        return [[self.grid[x][y] for x in range(self.width)] for y in range(self.height)]

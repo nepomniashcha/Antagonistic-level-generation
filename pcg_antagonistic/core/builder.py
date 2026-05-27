@@ -1,4 +1,5 @@
 import math
+import random
 from core.grid import CellType
 
 class Builder:
@@ -19,9 +20,6 @@ class Builder:
         """
         self.grid = grid
         self.solver = solver
-
-        # В дальнейшем сюда можно будет добавить дополнительные параметры,
-        # например, ограничение глубины для алгоритма Minimax (depth limit).
     
     def evaluate(self, test_grid):
         """
@@ -35,12 +33,6 @@ class Builder:
         Returns:
             float: Оценка стоимости пути. Если путь заблокирован, возвращает -inf.
         """
-        # Запрашиваем у Солвера оптимальный путь для переданного состояния сетки
-        # (предполагается, что метод find_path принимает конкретную сетку для анализа)
-        # (например, используются геттеры test_grid.get_start()), замени эти строки!
-        # start_pos = test_grid.get_start()  
-        # goal_pos = test_grid.get_goal()    
-        
 
         # Получаем объекты ячеек старта и финиша
         start_cell = test_grid.get_start()  
@@ -71,48 +63,30 @@ class Builder:
         return cost
     
     def get_best_move(self, current_grid, depth_limit):
-        """
-        Определяет лучшую координату для постановки препятствия.
-        Запускает алгоритм Minimax для каждой доступной пустой ячейки.
-
-        Args:
-            current_grid: Текущее состояние сетки.
-            depth_limit: Ограничение глубины поиска (сколько препятствий смотрим наперед).
-
-        Returns:
-            tuple: Координаты (x, y) для лучшего хода, или None, если ходов нет.
-        """
         best_score = -float('inf')
-        best_move = None
+        best_moves = [] # Теперь храним список всех равноценных лучших ходов
         
-        # Предполагается, что в Grid реализован метод get_empty_cells_coords(),
-        # возвращающий список кортежей [(x1, y1), (x2, y2), ...]
         empty_cells = current_grid.get_empty_cells_coords()
         
         for x, y in empty_cells:
-            # 1. Симулируем ход Конструктора (MAX)
-            current_grid.set_cell_type(x, y, 'OBSTACLE')
-            
-            # 2. Оцениваем ход с помощью Minimax 
-            # (следующий ход формально за Гравцем, поэтому is_maximizing=False)
+            current_grid.set_cell_type(x, y, CellType.OBSTACLE) 
             score = self.minimax(current_grid, depth_limit - 1, False)
+            current_grid.set_cell_type(x, y, CellType.EMPTY) 
             
-            # 3. Откатываем состояние сетки
-            current_grid.set_cell_type(x, y, 'EMPTY')
-            
-            # 4. Выбираем ход с максимальной выгодой
+            # Если нашли ход ЛУЧШЕ, очищаем список и начинаем заново
             if score > best_score:
                 best_score = score
-                best_move = (x, y)
+                best_moves = [(x, y)]
+            # Если нашли ход ТАКОЙ ЖЕ хороший, добавляем его в копилку
+            elif score == best_score:
+                best_moves.append((x, y))
                 
         # --- TASK 3.4: СТРОГАЯ ПРОВЕРКА ---
-        # Если после перебора всех вариантов best_score остался равен бесконечно малому значению,
-        # это означает, что ЛЮБОЕ добавленное препятствие блокирует путь (Solver вернул None или Infinity).
-        # Чтобы уровень оставался гарантированно проходным, ход отбрасывается полностью.
-        if best_score == -float('inf'):
+        if best_score == -float('inf') or not best_moves:
             return None
             
-        return best_move
+        # Случайно выбираем один из равноценных лучших ходов
+        return random.choice(best_moves)
 
     def minimax(self, test_grid, depth, is_maximizing, alpha=-float('inf'), beta=float('inf')):
         """
@@ -182,17 +156,11 @@ class Builder:
             # Строгая валидация (Task 3.4): если безопасных ходов больше нет,
             # Конструктор обязан прекратить работу, чтобы уровень остался проходным.
             if best_move is None:
-                # В реальном проекте здесь можно использовать модуль logging,
-                # но для простоты пока оставим print для отладки.
                 print(f"Генерация остановлена на шаге {step}: дальнейшая установка препятствий полностью заблокирует путь.")
                 break
                 
             x, y = best_move
-            
-            # Предполагается, что в CellType используется 'OBSTACLE' или CellType.OBSTACLE.
-            # Если у тебя Enum, замени строку на CellType.OBSTACLE и добавь нужный импорт.
-            self.grid.set_cell_type(x, y, 'OBSTACLE') 
-            
+            self.grid.set_cell_type(x, y, CellType.OBSTACLE)
             obstacles_placed += 1
             
         return obstacles_placed
@@ -220,6 +188,6 @@ class Builder:
         x, y = best_move
         
         # Устанавливаем препятствие
-        self.grid.set_cell_type(x, y, 'OBSTACLE') 
+        self.grid.set_cell_type(x, y, CellType.OBSTACLE) 
         
         return True

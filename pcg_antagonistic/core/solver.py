@@ -72,10 +72,16 @@ class Solver(ABC):
     
     def calculate_path(self):
         """Обертка для вызова поиска пути с текущими настройками старта и финиша"""
-        start = self.grid.get_start()
-        goal = self.grid.get_goal()
-        self._last_path = self.find_path(start, goal)
-        pass 
+        start_cell = self.grid.get_start()
+        goal_cell = self.grid.get_goal()
+        
+        # Проверяем, существуют ли старт и финиш, прежде чем извлекать координаты
+        if start_cell and goal_cell:
+            start_pos = (start_cell.x, start_cell.y)
+            goal_pos = (goal_cell.x, goal_cell.y)
+            self._last_path = self.find_path(start_pos, goal_pos)
+        else:
+            self._last_path = None
 
     def get_last_path(self) -> Optional[List[Tuple[int, int]]]:
         """Возвращает последний найденный путь"""
