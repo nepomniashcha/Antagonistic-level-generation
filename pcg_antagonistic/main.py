@@ -4,6 +4,7 @@ import pygame
 from core.grid import Grid
 from core.solver import Solver
 from core.astar import AStarSolver
+from core.dijkstra import DijkstraSolver
 from core.builder import Builder
 
 from ui.window import GameWindow
@@ -11,8 +12,8 @@ from ui.window import GameWindow
 def main():
     # --- 1. Логика инициализации приложения и структур данных ---
     # Задаем размеры дискретной сетки игрового поля
-    GRID_WIDTH = 20
-    GRID_HEIGHT = 20
+    GRID_WIDTH = 10
+    GRID_HEIGHT = 10
     
     # Экземпляризация Grid (Сетка)
     grid = Grid(GRID_WIDTH, GRID_HEIGHT)
@@ -24,7 +25,8 @@ def main():
     # --- 2. Экземпляризация Solver (Агент "Гравець" / A*) ---
     # Передаем сетку солверу, чтобы он мог выполнять по ней поиск пути
     # было solver = Solver(grid)
-    solver = AStarSolver(grid)
+    #solver = AStarSolver(grid)
+    solver = DijkstraSolver(grid)
 
     # --- 3. Экземпляризация Builder (Агент "Конструктор" / Minimax) ---
     # Конструктору нужна сетка для расстановки препятствий и Solver для оценки их влияния (целевая функция)
