@@ -45,27 +45,13 @@ class AStarSolver(Solver):
             # Если достигли цели, восстанавливаем и возвращаем путь
             if current == goal:
                 return self._reconstruct_path(came_from, current)
-            
+
             # Получаем соседей через интерфейс Grid (Task 1.3)
-            # for neighbor in self.grid.get_neighbors(current):
-            #     # Предполагаем, что базовый шаг стоит 1. 
-            #     # Если реализован Task 1.4 (веса ячеек), здесь нужно брать вес из grid.
-            #     tentative_g_score = g_score[current] + 1 
-                
-            #     # Если нашли более короткий путь до соседа
-            #     if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
-            #         came_from[neighbor] = current
-            #         g_score[neighbor] = tentative_g_score
-            #         f_score[neighbor] = tentative_g_score + self._heuristic(neighbor, goal)
-                    
-            #         if neighbor not in open_set_hash:
-            #             heapq.heappush(open_set, (f_score[neighbor], neighbor))
-            #             open_set_hash.add(neighbor)
-            # Получаем соседей (объекты Cell)
-            # Получаем соседей (уже в виде кортежей координат)
             for neighbor in self.grid.get_neighbors(current):
-                tentative_g_score = g_score[current] + 1 
+                move_cost = self.grid.get_cell_weight(neighbor[0], neighbor[1])
+                tentative_g_score = g_score[current] + move_cost 
                 
+                # Если нашли более короткий путь до соседа
                 if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g_score

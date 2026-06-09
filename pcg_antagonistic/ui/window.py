@@ -8,8 +8,10 @@ class GameWindow:
     COLOR_GREEN = (0, 255, 0)          # Точка старта
     COLOR_RED = (255, 0, 0)            # Точка финиша
     COLOR_BLUE = (0, 0, 255)           # Оптимальный путь
+    COLOR_LIGHT_BROWN = (144, 238, 144)
+    COLOR_DARK_BROWN = (75, 83, 32)
     
-    def __init__(self, window_width, window_height, grid_width, grid_height, fps=60):
+    def __init__(self, window_width, window_height, grid_width, grid_height, cell_size, fps=60):
         """
         Инициализация окна игры, настройка размеров и FPS.
         """
@@ -17,11 +19,8 @@ class GameWindow:
         self.window_height = window_height
         self.grid_width = grid_width
         self.grid_height = grid_height
+        self.cell_size = cell_size
         self.fps = fps
-        
-        # Вычисление размера одной ячейки (в пикселях) для отрисовки
-        self.cell_width = window_width // grid_width
-        self.cell_height = window_height // grid_height
         
         # Инициализация Pygame
         pygame.init()
@@ -65,12 +64,9 @@ class GameWindow:
         rows = len(grid_data)
         cols = len(grid_data[0])
 
-        # Динамическое вычисление размеров одной ячейки на основе размера окна
-        cell_width = self.window_width // cols
-        cell_height = self.window_height // rows
-
         for y in range(rows):
             for x in range(cols):
+                cell = grid_data[y][x]
                 # Получаем строковое представление типа ячейки для универсальности
                 cell_value = str(grid_data[y][x]).upper()
 
@@ -83,11 +79,16 @@ class GameWindow:
                     color = self.COLOR_GREEN
                 elif "GOAL" in cell_value:
                     color = self.COLOR_RED
+                elif "INTERACTIVE" in cell_value:
+                    if cell.weight >= 5.0:
+                        color = self.COLOR_DARK_BROWN
+                    else:
+                        color = self.COLOR_LIGHT_BROWN 
                 else:
                     color = self.COLOR_WHITE
 
                 # Вычисление координат для текущего квадрата
-                rect = (x * cell_width, y * cell_height, cell_width, cell_height)
+                rect = (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
 
                 # Отрисовка заливки ячейки
                 pygame.draw.rect(self.screen, color, rect)
@@ -107,19 +108,13 @@ class GameWindow:
         if not path_coords:
             return
 
-        # Вычисляем размеры ячейки (аналогично методу draw_grid)
-        cell_width = self.window_width // self.grid_width
-        cell_height = self.window_height // self.grid_height
-
         for x, y in path_coords:
-                    # Делаем отступы, чтобы путь рисовался внутри ячейки, а не на всю её ширину
-                    margin_x = cell_width // 4
-                    margin_y = cell_height // 4
+                    margin = self.cell_size // 4
                     
-                    rect = (x * cell_width + margin_x, 
-                            y * cell_height + margin_y, 
-                            cell_width - (margin_x * 2), 
-                            cell_height - (margin_y * 2))
+                    rect = (x * self.cell_size + margin, 
+                            y * self.cell_size + margin, 
+                            self.cell_size - (margin * 2), 
+                            self.cell_size - (margin * 2))
 
                     # Закрашиваем ячейку цветом пути
                     pygame.draw.rect(self.screen, self.COLOR_BLUE, rect)

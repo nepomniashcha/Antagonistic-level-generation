@@ -35,7 +35,8 @@ class DijkstraSolver(Solver):
             for neighbor in self.grid.get_neighbors(current):
                 # В базовом варианте стоимость перехода равна 1.
                 # Если в Task 1.4 реализованы веса ячеек, здесь нужно брать вес из grid.
-                new_cost = cost_so_far[current] + 1 
+                move_cost = self.grid.get_cell_weight(neighbor[0], neighbor[1])
+                new_cost = cost_so_far[current] + move_cost 
                 
                 # Если сосед еще не посещен или найден более дешевый путь к нему
                 if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:

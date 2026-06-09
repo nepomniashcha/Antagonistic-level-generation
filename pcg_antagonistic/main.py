@@ -9,11 +9,11 @@ from core.builder import Builder
 
 from ui.window import GameWindow
 
-def main():
+def main(n, m):
     # --- 1. Логика инициализации приложения и структур данных ---
     # Задаем размеры дискретной сетки игрового поля
-    GRID_WIDTH = 10
-    GRID_HEIGHT = 10
+    GRID_WIDTH = n
+    GRID_HEIGHT = m
     
     # Экземпляризация Grid (Сетка)
     grid = Grid(GRID_WIDTH, GRID_HEIGHT)
@@ -22,11 +22,27 @@ def main():
     grid.set_start(0, 0)
     grid.set_goal(GRID_WIDTH - 1, GRID_HEIGHT - 1)
 
+    # Обычная пустая клетка стоит 1.0.
+    # Давайте добавим "болото" со стоимостью 5.0 на пути алгоритма.
+    
+    grid.set_interactive_object(3, 3, weight=5.0)
+    grid.set_interactive_object(3, 4, weight=5.0)
+    grid.set_interactive_object(3, 5, weight=5.0)
+    
+    # А здесь добавим "густой лес" со стоимостью 3.0
+    grid.set_interactive_object(5, 5, weight=3.0)
+    grid.set_interactive_object(6, 5, weight=3.0)
+    grid.set_interactive_object(7, 8, weight=3.0)
+    grid.set_interactive_object(9, 1, weight=3.0)
+    grid.set_interactive_object(2, 3, weight=3.0)
+    grid.set_interactive_object(8, 2, weight=3.0)
+    grid.set_interactive_object(1, 7, weight=3.0)
+
     # --- 2. Экземпляризация Solver (Агент "Гравець" / A*) ---
     # Передаем сетку солверу, чтобы он мог выполнять по ней поиск пути
     # было solver = Solver(grid)
-    #solver = AStarSolver(grid)
-    solver = DijkstraSolver(grid)
+    solver = AStarSolver(grid)
+    #solver = DijkstraSolver(grid)
 
     # --- 3. Экземпляризация Builder (Агент "Конструктор" / Minimax) ---
     # Конструктору нужна сетка для расстановки препятствий и Solver для оценки их влияния (целевая функция)
@@ -34,13 +50,14 @@ def main():
 
     # --- 4. Экземпляризация GameWindow (Графический интерфейс) ---
     # Задаем размеры окна в пикселях
-    WINDOW_WIDTH = 800
-    WINDOW_HEIGHT = 800
+    CELL_SIZE = 40 # Ви можете змінити це значення (наприклад, 30, 50)
+    
+    # Розміри вікна тепер обчислюються автоматично на основі кількості комірок
+    WINDOW_WIDTH = GRID_WIDTH * CELL_SIZE
+    WINDOW_HEIGHT = GRID_HEIGHT * CELL_SIZE
     
     # Инициализируем окно, передавая ему необходимые параметры для отрисовки
-    game_window = GameWindow(WINDOW_WIDTH, WINDOW_HEIGHT, GRID_WIDTH, GRID_HEIGHT)
-
-    # ... (код до игрового цикла остается прежним) ...
+    game_window = GameWindow(WINDOW_WIDTH, WINDOW_HEIGHT, GRID_WIDTH, GRID_HEIGHT, CELL_SIZE)
     
     # --- 5. Налаштування ігрового циклу (Task 5.2) ---
     clock = pygame.time.Clock()
@@ -57,7 +74,6 @@ def main():
         # ПРАВИЛЬНО ИЗВЛЕКАЕМ СЛОВАРЬ
         actions = game_window.handle_events()
         
-        # Если нажали крестик или Esc - выходим из цикла
         if actions["quit"]:
             running = False
             break
@@ -91,4 +107,7 @@ def main():
     game_window.quit() # Корректное закрытие окна
 
 if __name__ == "__main__":
-    main()
+    n = 10 
+    m = 10
+            
+    main(n, m)

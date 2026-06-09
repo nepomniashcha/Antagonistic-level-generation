@@ -19,20 +19,21 @@ class Cell:
     x: int
     y: int
     type: CellType = CellType.EMPTY
+    weight: float = 1.0
 
     def is_passable(self) -> bool:
         """Вспомогательный метод: проверяет, можно ли пройти через ячейку."""
         return self.type != CellType.OBSTACLE
     
     
-    # def get_cost(self) -> float:
-    #     """
-    #     Возвращает стоимость перехода в данную ячейку.
-    #     Для интерактивных объектов возвращается их индивидуальный вес.
-    #     """
-    #     if self.type == CellType.INTERACTIVE:
-    #         return self.weight
-    #     return 1.0  # Базовая стоимость для EMPTY, START, GOAL
+    def get_cost(self) -> float:
+        """
+        Возвращает стоимость перехода в данную ячейку.
+        Для интерактивных объектов возвращается их индивидуальный вес.
+        """
+        if self.type == CellType.INTERACTIVE:
+            return self.weight
+        return 1.0  # Базовая стоимость для EMPTY, START, GOAL
 
 class Grid:
     """
@@ -73,36 +74,6 @@ class Grid:
             self.grid[x][y].type = cell_type
         else:
             raise IndexError(f"Координаты ({x}, {y}) находятся вне границ сетки размером {self.width}x{self.height}.")
-    
-    # def get_neighbors(self, cell: Cell) -> list[Cell]:
-    #     """
-    #     Возвращает список соседних доступных (проходимых) ячеек.
-    #     В данной реализации диагональные перемещения отключены.
-    #     """
-    #     neighbors = []
-    #     x, y = cell.x, cell.y
-
-    #     # Соседние клетки по вертикали и горизонтали (вверх, вправо, вниз, влево)
-    #     directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
-
-    #     # Диагональные соседи (закомментированы по условию задачи)
-    #     # diagonal_directions = [(-1, -1), (1, -1), (1, 1), (-1, 1)]
-    #     # directions.extend(diagonal_directions)
-
-    #     for dx, dy in directions:
-    #         nx, ny = x + dx, y + dy
-            
-    #         # Проверяем, не выходит ли сосед за границы поля
-    #         if self._is_within_bounds(nx, ny):
-    #             neighbor_cell = self.grid[nx][ny]
-                
-    #             # Добавляем в список только проходимые ячейки (не препятствия)
-    #             if neighbor_cell.is_passable():
-    #                 neighbors.append(neighbor_cell)
-
-    #     return neighbors
-
-
 
     def get_neighbors(self, pos: Tuple[int, int]) -> List[Tuple[int, int]]:
         """
@@ -166,17 +137,27 @@ class Grid:
                     return cell
         return None
     
-    # def set_interactive_object(self, x: int, y: int, weight: float) -> None:
-    #     """
-    #     Превращает ячейку в интерактивный объект и задает стоимость (вес) её прохождения.
-    #     Чем выше вес, тем менее охотно алгоритмы поиска пути будут через неё проходить.
-    #     """
-    #     if self._is_within_bounds(x, y):
-    #         cell = self.grid[x][y]
-    #         cell.type = CellType.INTERACTIVE
-    #         cell.weight = weight
-    #     else:
-    #         raise IndexError(f"Координаты ({x}, {y}) находятся вне границ сетки размером {self.width}x{self.height}.")
+    def get_cell_weight(self, x: int, y: int) -> float:
+        """
+        Возвращает числовой вес (стоимость) ячейки по координатам.
+        Этот метод используется базовым классом Solver.
+        """
+        cell = self.get_cell(x, y)
+        if cell:
+            return cell.get_cost()
+        return float('inf')
+        
+    def set_interactive_object(self, x: int, y: int, weight: float) -> None:
+        """
+        Превращает ячейку в интерактивный объект и задает стоимость (вес) её прохождения.
+        Чем выше вес, тем менее охотно алгоритмы поиска пути будут через неё проходить.
+        """
+        if self._is_within_bounds(x, y):
+            cell = self.grid[x][y]
+            cell.type = CellType.INTERACTIVE
+            cell.weight = weight
+        else:
+            raise IndexError(f"Координаты ({x}, {y}) находятся вне границ сетки размером {self.width}x{self.height}.")
 
     def get_empty_cells_coords(self) -> list[tuple[int, int]]:
         """
